@@ -82,7 +82,11 @@ public class MainActivity extends AppCompatActivity {
                 textoDigitado[0] = newText.toUpperCase();
 
                     listaPersonagens.clear();
-                    //buscaLista(jsonRecebido,textoDigitado[0]);
+                try {
+                    buscaLista(textoDigitado[0]);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
 
                 return true;
@@ -132,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
 
                                 RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
                                 recyclerView_ID.setLayoutManager(layoutManager);
-                                recyclerView_ID.setHasFixedSize(true);
                                 final Adapter adapter = new Adapter(listaPersonagens);
                                 recyclerView_ID.setAdapter(adapter);
 
@@ -156,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                                     String   caminhoImg = dataTumb.getString("path")+".jpg";
                                     String   name       = jsonObject.getString("name");
 
-                                    String testaBusca ="";
+                                    String testaBusca = name;
                                     if(testaBusca.contains(busca)){
                                         modelo modelo = new modelo (
                                                 name,
@@ -229,7 +232,6 @@ public class MainActivity extends AppCompatActivity {
 
                                 RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
                                 recyclerView_ID.setLayoutManager(layoutManager);
-                                recyclerView_ID.setHasFixedSize(true);
                                 final Adapter adapter = new Adapter(listaPersonagens);
                                 recyclerView_ID.setAdapter(adapter);
 
