@@ -49,11 +49,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder> {
         holder.name_ID.setText(modelo.getName());
         Glide.with(holder.path_ID).load(modelo.getPath()).into(holder.path_ID);
 
-/*
-        holder.name_ID.setText("teste");
-        Glide.with(holder.path_ID).load("http://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg").into(holder.path_ID);
-
- */
      }
 
 

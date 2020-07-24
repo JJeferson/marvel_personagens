@@ -1,19 +1,26 @@
 package com.a.marvel_personagens;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.a.marvel_personagens.adapter.Adapter;
-import com.a.marvel_personagens.R;
 import com.a.marvel_personagens.model.modelo;
+import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
     private List<modelo> listaPersonagens = new ArrayList<>();
 
     @Override
@@ -62,7 +71,37 @@ public class MainActivity extends AppCompatActivity {
         consomeAPI();
 
 
+        recyclerView_ID.addOnItemTouchListener(
+                new RecyclerItemClickListener(
+                        getApplicationContext(),
+                        recyclerView_ID,
+                        new RecyclerItemClickListener.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
 
+                                final int posicao = position;
+                                alertDialogDadosPersonagem(posicao);
+
+
+
+                            }
+
+
+                            @Override
+                            public void onLongItemClick(View view, int position) {
+
+
+
+                            }
+
+
+                            @Override
+                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                            }
+                        }
+                )
+        );//Fim do evento de lick
 
 
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -94,6 +133,84 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+
+
+
+    public void alertDialogDadosPersonagem(final int posicao){
+
+        //Criando o AlertDialog
+        final AlertDialog.Builder alertDialogEmissao = new AlertDialog.Builder(MainActivity.this);
+
+
+        //---------------------------------
+        final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View v = inflater.inflate(R.layout.alertdialog_personagem, null, false);
+        //Aqui declarar os componentes da view
+
+        final TextView name_ID                         = v.findViewById(R.id.name_ID);
+        final TextView description_ID                  = v.findViewById(R.id.description_ID);
+        final ImageView path_ID                        = v.findViewById(R.id.path_ID);
+        final ListView  listView_ID                    = v.findViewById(R.id.listView_ID);
+
+         ArrayAdapter<String> itensAdapter;
+         ArrayList<String> itens;
+
+        alertDialogEmissao.setView(v);
+        //Faz não poder sair
+        alertDialogEmissao.setCancelable(false);
+
+        final modelo modelo = listaPersonagens.get(posicao);
+
+
+        name_ID.setText(modelo.getName());
+        description_ID.setText(modelo.getDescription());
+        String caminhoImagemPoster = modelo.getPath();
+        Glide.with(path_ID).load(caminhoImagemPoster).into(path_ID);
+        String Json_itens= modelo.getDados_adicionais();
+
+
+        try {
+        JSONArray jsonArray = new JSONArray(Json_itens);
+        JSONObject jsonObject;
+
+        itens = new ArrayList<String>();
+
+        itensAdapter = new ArrayAdapter<String>(getApplicationContext(),
+                android.R.layout.simple_list_item_2,
+                android.R.id.text2, itens);
+        listView_ID.setAdapter(itensAdapter);
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            jsonObject = jsonArray.getJSONObject(i);
+            itens.add(jsonObject.getString("name")
+            );
+        }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+        alertDialogEmissao.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+
+            }
+
+
+
+        });//fim do positive
+
+
+        //deixa visivel
+        alertDialogEmissao.create();
+        alertDialogEmissao.show();
+
+    }
+
 
 
     public void buscaLista(final String busca) throws JSONException {
@@ -129,10 +246,8 @@ public class MainActivity extends AppCompatActivity {
 
                             try {
 
-                                //recebe o json em string
+
                                 String data = response.body().string();
-
-
 
                                 RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
                                 recyclerView_ID.setLayoutManager(layoutManager);
@@ -141,37 +256,40 @@ public class MainActivity extends AppCompatActivity {
 
 
                                 JSONObject json = new JSONObject(data);
-                                //entra an chave data
                                 JSONObject datajson = json.getJSONObject("data");
-                                //entra na chave results
-                                JSONArray results = datajson.getJSONArray("results");
-                                //Uma vez já dentro da chave certa devolvo ao formato string para usar.
-                                String StringData = String.valueOf(results);
+                                JSONArray resultjson = datajson.getJSONArray("results");
+                                String stringResultjson = String.valueOf(resultjson);
 
-                                JSONArray jsonArray = new JSONArray(StringData);
+
+
+                                JSONArray jsonArray = new JSONArray(stringResultjson );
                                 JSONObject jsonObject;
-
 
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     jsonObject = jsonArray.getJSONObject(i);
 
-                                    JSONObject dataTumb = jsonObject.getJSONObject("thumbnail");
-                                    String   caminhoImg = dataTumb.getString("path")+".jpg";
-                                    String   name       = jsonObject.getString("name");
+                                    JSONObject comicjson =  jsonObject.getJSONObject("comics");
+                                    JSONArray resultitems  = comicjson.getJSONArray("items");
 
+
+                                    JSONObject dataTumb       = jsonObject.getJSONObject("thumbnail");
+                                    String   caminhoImg       = dataTumb.getString("path")+".jpg";
+                                    String   name             = jsonObject.getString("name");
+                                    String   description      = jsonObject.getString("description");
+                                    String   dados_adicionais = String.valueOf(resultitems);
                                     String testaBusca = name;
+
                                     if(testaBusca.contains(busca)){
                                         modelo modelo = new modelo (
                                                 name,
-                                                caminhoImg);
-
+                                                caminhoImg,
+                                                description,
+                                                dados_adicionais);
                                         listaPersonagens.add(modelo);
                                         adapter.notifyDataSetChanged();
                                     }
-                                }
 
-
-
+                                    }
                             } catch (IOException | JSONException e) {
                                 e.printStackTrace();
                             }
@@ -225,10 +343,7 @@ public class MainActivity extends AppCompatActivity {
 
                             try {
 
-                                //recebe o json em string
                                 String data = response.body().string();
-
-
 
                                 RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
                                 recyclerView_ID.setLayoutManager(layoutManager);
@@ -237,32 +352,37 @@ public class MainActivity extends AppCompatActivity {
 
 
                                 JSONObject json = new JSONObject(data);
-                                //entra an chave data
                                 JSONObject datajson = json.getJSONObject("data");
-                                //entra na chave results
-                                JSONArray results = datajson.getJSONArray("results");
-                                //Uma vez já dentro da chave certa devolvo ao formato string para usar.
-                                String StringData = String.valueOf(results);
+                                JSONArray resultjson = datajson.getJSONArray("results");
+                                String stringResultjson = String.valueOf(resultjson);
 
-                                JSONArray jsonArray = new JSONArray(StringData);
+
+
+                                JSONArray jsonArray = new JSONArray(stringResultjson );
                                 JSONObject jsonObject;
 
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     jsonObject = jsonArray.getJSONObject(i);
 
-                                    JSONObject dataTumb = jsonObject.getJSONObject("thumbnail");
-                                    String   caminhoImg = dataTumb.getString("path")+".jpg";
-                                    String   name       = jsonObject.getString("name");
+                                    JSONObject comicjson =  jsonObject.getJSONObject("comics");
+                                    JSONArray resultitems  = comicjson.getJSONArray("items");
 
+
+                                    JSONObject dataTumb       = jsonObject.getJSONObject("thumbnail");
+                                    String   caminhoImg       = dataTumb.getString("path")+".jpg";
+                                    String   name             = jsonObject.getString("name");
+                                    String   description      = jsonObject.getString("description");
+                                    String   dados_adicionais = String.valueOf(resultitems);
                                     modelo modelo = new modelo (
                                             name,
-                                            caminhoImg);
+                                            caminhoImg,
+                                            description,
+                                            dados_adicionais);
+
+
 
                                     listaPersonagens.add(modelo);
                                     adapter.notifyDataSetChanged();
-
-
-
 
                                 }
 
