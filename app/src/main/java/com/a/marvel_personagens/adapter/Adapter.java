@@ -44,12 +44,16 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder> {
 
 
 
-          modelo modelo = listaPersonagens.get(position);
+        modelo modelo = listaPersonagens.get(position);
 
         holder.name_ID.setText(modelo.getName());
-        holder.description_ID.setText(modelo.getDescription());
         Glide.with(holder.path_ID).load(modelo.getPath()).into(holder.path_ID);
 
+/*
+        holder.name_ID.setText("teste");
+        Glide.with(holder.path_ID).load("http://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg").into(holder.path_ID);
+
+ */
      }
 
 
@@ -63,16 +67,14 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder> {
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
         TextView   name_ID;
-        TextView   description_ID;
         ImageView  path_ID;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
 
-            name_ID      = itemView.findViewById(R.id.name_ID);
-            description_ID       = itemView.findViewById(R.id.description_ID);
-            path_ID       = itemView.findViewById(R.id.path_ID);
+            name_ID              = itemView.findViewById(R.id.name_ID);
+            path_ID              = itemView.findViewById(R.id.path_ID);
 
         }
     }
